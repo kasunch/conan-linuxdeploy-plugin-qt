@@ -1,0 +1,65 @@
+Index: CMakeLists.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- CMakeLists.txt	(revision cbc0b47904cf3487a4c38ed5876589382a4cd940)
++++ CMakeLists.txt	(date 1556661382000)
+@@ -1,6 +1,15 @@
+ cmake_minimum_required(VERSION 3.6)
+ project(linuxdeploy-plugin-qt)
+ 
++if(USE_CONAN)
++    include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
++    conan_basic_setup(NO_OUTPUT_DIRS)
++endif()
++
++find_package(linuxdeploy REQUIRED)
++find_package(args REQUIRED)
++find_package(Boost REQUIRED modules filesystem)
++
+ set(CMAKE_CXX_STANDARD 11)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ 
+Index: src/CMakeLists.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/CMakeLists.txt	(revision cbc0b47904cf3487a4c38ed5876589382a4cd940)
++++ src/CMakeLists.txt	(date 1556661368000)
+@@ -1,5 +1,5 @@
+ add_executable(linuxdeploy-plugin-qt main.cpp qt-modules.h qml.cpp qml.h util.h)
+-target_link_libraries(linuxdeploy-plugin-qt linuxdeploy_core args json)
++target_link_libraries(linuxdeploy-plugin-qt linuxdeploy::linuxdeploy args::args Boost::filesystem json)
+ set_target_properties(linuxdeploy-plugin-qt PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
+ 
+ install(
+Index: lib/CMakeLists.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- lib/CMakeLists.txt	(revision cbc0b47904cf3487a4c38ed5876589382a4cd940)
++++ lib/CMakeLists.txt	(date 1556659434000)
+@@ -1,4 +1,3 @@
+-add_subdirectory(linuxdeploy EXCLUDE_FROM_ALL)
+ if(NOT TARGET gtest)
+     add_subdirectory(googletest EXCLUDE_FROM_ALL)
+ endif()
+Index: tests/CMakeLists.txt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- tests/CMakeLists.txt	(revision cbc0b47904cf3487a4c38ed5876589382a4cd940)
++++ tests/CMakeLists.txt	(date 1556661399000)
+@@ -1,7 +1,7 @@
+ enable_testing()
+ 
+ add_executable(linuxdeploy-plugin-qt-tests test_main.cpp test_deploy_qml.cpp ../src/qml.cpp)
+-target_link_libraries(linuxdeploy-plugin-qt-tests linuxdeploy_core args json gtest)
++target_link_libraries(linuxdeploy-plugin-qt-tests linuxdeploy::linuxdeploy args::args json gtest)
+ target_compile_definitions(linuxdeploy-plugin-qt-tests PRIVATE TESTS_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data")
+ 
+ add_test(linuxdeploy-plugin-qt-tests linuxdeploy-plugin-qt-tests)
