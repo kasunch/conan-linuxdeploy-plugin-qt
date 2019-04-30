@@ -1,4 +1,5 @@
 from conans import ConanFile, CMake, tools
+import os
 
 
 class LinuxdeploypluginqtConan(ConanFile):
@@ -33,6 +34,9 @@ class LinuxdeploypluginqtConan(ConanFile):
 
     def package(self):
         self.copy("linuxdeploy-plugin-qt", dst="bin", src="bin")
+
+    def package_info(self):
+        self.env_info.PATH.append(os.path.join(self.package_folder, "bin"))
 
     def deploy(self):
         self.copy("*", dst="bin", src="bin")
