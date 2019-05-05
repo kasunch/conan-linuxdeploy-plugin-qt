@@ -12,7 +12,7 @@ class LinuxdeploypluginqtConan(ConanFile):
     topics = ("AppImage", "Qt", "linuxdeploy")
     settings = "os", "compiler", "build_type", "arch"
     generators = ("cmake", "cmake_find_package", "cmake_paths")
-    build_requires = "cmake_installer/3.13.0@conan/stable"
+    # build_requires = "cmake_installer/3.13.0@conan/stable"
     exports_sources = "patches/*"
 
     def requirements(self):
