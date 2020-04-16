@@ -19,17 +19,46 @@ class LinuxdeploypluginqtConan(ConanFile):
         self.requires("args/6.2.2@pavel-belikov/stable")
         #self.requires("linuxdeploy/continuous@appimage-conan-community/stable")
         self.requires("linuxdeploy/continuous@bincreators/stable")
+        self.requires("gtest/1.10.0")
 
     def source(self):
         self.run("git clone https://github.com/linuxdeploy/linuxdeploy-plugin-qt.git --depth=1")
-        self.run("cd linuxdeploy-plugin-qt && git rm --cached lib/linuxdeploy")
+        self.run("cd linuxdeploy-plugin-qt && git rm --cached lib/linuxdeploy && git rm --cached lib/googletest")
         self.run("cd linuxdeploy-plugin-qt && git submodule update --init --recursive")
-        tools.patch(base_path="linuxdeploy-plugin-qt", patch_file="patches/use_conan.patch")
 
     def build(self):
+      
+        tools.replace_in_file(os.path.join(self.source_folder, "linuxdeploy-plugin-qt", "lib", "CMakeLists.txt"), 
+                                            "add_subdirectory(linuxdeploy EXCLUDE_FROM_ALL)", "")
+
+        tools.replace_in_file(os.path.join(self.source_folder, "linuxdeploy-plugin-qt", "lib", "CMakeLists.txt"), 
+                                            "add_subdirectory(googletest EXCLUDE_FROM_ALL)", "")
+      
+        tools.replace_in_file(os.path.join(self.source_folder, "linuxdeploy-plugin-qt", "CMakeLists.txt"), 
+                                            "add_subdirectory(lib)", 
+                                            """
+                                            add_subdirectory(lib)
+                                            include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+                                            conan_basic_setup(NO_OUTPUT_DIRS)
+                                            find_package(linuxdeploy REQUIRED)
+                                            find_package(args REQUIRED)
+                                            find_package(Boost REQUIRED modules filesystem)
+                                            find_package(GTest REQUIRED)
+                                            """)
+        tools.replace_in_file(os.path.join(self.source_folder, "linuxdeploy-plugin-qt", "tests", "CMakeLists.txt"), 
+        "target_link_libraries(linuxdeploy-plugin-qt-tests linuxdeploy_core args json gtest linuxdeploy-plugin-qt_util)", 
+        "target_link_libraries(linuxdeploy-plugin-qt-tests linuxdeploy_core json GTest::GTest linuxdeploy-plugin-qt_util)")
+
+        tools.replace_in_file(os.path.join(self.source_folder, "linuxdeploy-plugin-qt", "src", "CMakeLists.txt"), 
+        "target_link_libraries(linuxdeploy-plugin-qt_util linuxdeploy_core args)", 
+        "target_link_libraries(linuxdeploy-plugin-qt_util PUBLIC linuxdeploy::linuxdeploy args::args)")
+
+        tools.replace_in_file(os.path.join(self.source_folder, "linuxdeploy-plugin-qt", "src", "CMakeLists.txt"), 
+        "target_link_libraries(linuxdeploy-plugin-qt linuxdeploy_core args json linuxdeploy-plugin-qt_util)", 
+        "target_link_libraries(linuxdeploy-plugin-qt json linuxdeploy-plugin-qt_util)")
+      
         cmake = CMake(self)
         cmake.definitions["CMAKE_PROJECT_linuxdeploy-plugin-qt_INCLUDE"] = self.build_folder + "/conan_paths.cmake"
-        cmake.definitions["USE_CONAN"] = True
         cmake.configure(source_folder="linuxdeploy-plugin-qt")
         cmake.build()
 
