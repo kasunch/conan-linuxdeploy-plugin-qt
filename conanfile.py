@@ -17,7 +17,8 @@ class LinuxdeploypluginqtConan(ConanFile):
 
     def requirements(self):
         self.requires("args/6.2.2@pavel-belikov/stable")
-        self.requires("linuxdeploy/continuous@appimage-conan-community/stable")
+        #self.requires("linuxdeploy/continuous@appimage-conan-community/stable")
+        self.requires("linuxdeploy/continuous@bincreators/stable")
 
     def source(self):
         self.run("git clone https://github.com/linuxdeploy/linuxdeploy-plugin-qt.git --depth=1")
